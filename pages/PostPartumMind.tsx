@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ResponsiveContainer, AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
-import { Smile, Frown, Meh, Lock, Mic, ArrowRight, X, Send, Shield, Activity, Heart, AlertCircle, CheckCircle2, Sparkles } from 'lucide-react';
+import { Smile, Frown, Meh, Lock, Mic, ArrowRight, X, Send, Shield, Activity, Heart, AlertCircle, CheckCircle2, Sparkles, Globe } from 'lucide-react';
 import { AppPhase } from '../types';
+import { SpeakableText, SpeakButton } from '../components/SpeakableText';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface PageProps {
   phase: AppPhase;
@@ -79,6 +81,7 @@ const epdsQuestions = [
 ];
 
 export const PostPartumMind: React.FC<PageProps> = ({ phase }) => {
+  const { language, setLanguage, supportedLanguages } = useLanguage();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [selectedMood, setSelectedMood] = useState<string>('good');
@@ -150,18 +153,40 @@ export const PostPartumMind: React.FC<PageProps> = ({ phase }) => {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
       
+      {/* Language Selector */}
+      <div className="flex justify-end">
+        <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-slate-200 shadow-sm">
+          <Globe size={16} className="text-slate-500" />
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="bg-transparent text-sm font-medium text-slate-700 focus:outline-none cursor-pointer"
+          >
+            {supportedLanguages.map((lang) => (
+              <option key={lang.code} value={lang.code}>
+                {lang.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       {/* Motivational Quote - Centered */}
       <div className="flex flex-col items-center justify-center text-center py-16 bg-slate-50/50 rounded-[2rem] my-4">
         <Heart size={40} className="text-purple-400 mb-6" />
-        <p className="font-serif italic text-3xl md:text-4xl lg:text-5xl text-slate-800 leading-relaxed max-w-4xl px-8" style={{ fontFamily: "'DM Serif Display', serif" }}>
-          Healing takes time, and that's okay. You're doing an incredible job.
-        </p>
+        <SpeakableText text="Healing takes time, and that's okay. You're doing an incredible job.">
+          <p className="font-serif italic text-3xl md:text-4xl lg:text-5xl text-slate-800 leading-relaxed max-w-4xl px-8" style={{ fontFamily: "'DM Serif Display', serif" }}>
+            Healing takes time, and that's okay. You're doing an incredible job.
+          </p>
+        </SpeakableText>
       </div>
 
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-display font-extrabold text-slate-900">Stress & Mind</h1>
-          <p className="text-slate-500 mt-1">Your postpartum mental wellness companion.</p>
+          <SpeakableText text="Stress and Mind. Your postpartum mental wellness companion.">
+            <h1 className="text-3xl font-display font-extrabold text-slate-900">Stress & Mind</h1>
+            <p className="text-slate-500 mt-1">Your postpartum mental wellness companion.</p>
+          </SpeakableText>
         </div>
       </div>
 

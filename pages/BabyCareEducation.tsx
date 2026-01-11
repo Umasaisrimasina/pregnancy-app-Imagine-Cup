@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Heart, Brain, Baby, Shield, Sparkles, BookOpen, Calendar, Syringe, Scale, Users, CheckCircle2, X, ArrowRight, Clock, MapPin, FileText, Lightbulb, Check, ChevronLeft, ChevronRight, Volume2, Share2 } from 'lucide-react';
+import { ShieldCheck, Heart, Brain, Baby, Shield, Sparkles, BookOpen, Calendar, Syringe, Scale, Users, CheckCircle2, X, ArrowRight, Clock, MapPin, FileText, Lightbulb, Check, ChevronLeft, ChevronRight, Volume2, Share2, Globe } from 'lucide-react';
+import { SpeakableText, SpeakButton } from '../components/SpeakableText';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export const BabyCareEducation: React.FC = () => {
+  const { language, setLanguage, supportedLanguages } = useLanguage();
   const [currentMythIndex, setCurrentMythIndex] = useState(0);
   const [isCaregiverModalOpen, setIsCaregiverModalOpen] = useState(false);
   const [bookingStep, setBookingStep] = useState(1);
@@ -64,6 +67,24 @@ export const BabyCareEducation: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
       
+      {/* Language Selector */}
+      <div className="flex justify-end">
+        <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-slate-200 shadow-sm">
+          <Globe size={16} className="text-slate-500" />
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="bg-transparent text-sm font-medium text-slate-700 focus:outline-none cursor-pointer"
+          >
+            {supportedLanguages.map((lang) => (
+              <option key={lang.code} value={lang.code}>
+                {lang.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       {/* Hero */}
       <div className="bg-white rounded-[2rem] p-8 lg:p-12 shadow-sm border border-slate-100 overflow-hidden relative">
          <div className="absolute top-0 right-0 w-96 h-96 bg-sky-50 rounded-full blur-[100px] -mr-20 -mt-20 opacity-60 pointer-events-none"></div>
@@ -72,12 +93,14 @@ export const BabyCareEducation: React.FC = () => {
                <Baby size={14} />
                Baby Care Guide
             </div>
-            <h1 className="text-4xl lg:text-5xl font-display font-extrabold text-slate-900 mb-6 leading-tight">
-               Everything about <br/>caring for baby.
-            </h1>
-            <p className="text-lg text-slate-600 leading-relaxed max-w-2xl">
-              Evidence-based guidance for newborn care, development milestones, feeding, sleep, and keeping your little one healthy and happy.
-            </p>
+            <SpeakableText text="Everything about caring for baby. Evidence-based guidance for newborn care, development milestones, feeding, sleep, and keeping your little one healthy and happy.">
+              <h1 className="text-4xl lg:text-5xl font-display font-extrabold text-slate-900 mb-6 leading-tight">
+                 Everything about <br/>caring for baby.
+              </h1>
+              <p className="text-lg text-slate-600 leading-relaxed max-w-2xl">
+                Evidence-based guidance for newborn care, development milestones, feeding, sleep, and keeping your little one healthy and happy.
+              </p>
+            </SpeakableText>
          </div>
       </div>
 
@@ -407,9 +430,10 @@ export const BabyCareEducation: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button className="w-8 h-8 rounded-full bg-white/80 border border-amber-200 flex items-center justify-center text-amber-600 hover:bg-amber-50 transition-colors">
-              <Volume2 size={14} />
-            </button>
+            <SpeakButton 
+              text={`Myth: ${myths[currentMythIndex].myth}. Fact: ${myths[currentMythIndex].fact}`}
+              size={14}
+            />
             <button className="w-8 h-8 rounded-full bg-white/80 border border-amber-200 flex items-center justify-center text-amber-600 hover:bg-amber-50 transition-colors">
               <Share2 size={14} />
             </button>
@@ -423,10 +447,11 @@ export const BabyCareEducation: React.FC = () => {
               <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center shrink-0">
                 <X size={16} className="text-red-500" />
               </div>
-              <div>
+              <div className="flex-1">
                 <span className="text-[10px] font-bold text-red-500 uppercase tracking-wider block mb-1">Myth</span>
                 <p className="text-slate-800 font-semibold leading-relaxed">"{myths[currentMythIndex].myth}"</p>
               </div>
+              <SpeakButton text={`Myth: ${myths[currentMythIndex].myth}`} />
             </div>
             
             {/* Fact */}
@@ -434,10 +459,11 @@ export const BabyCareEducation: React.FC = () => {
               <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
                 <Check size={16} className="text-emerald-600" />
               </div>
-              <div>
+              <div className="flex-1">
                 <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider block mb-1">Fact</span>
                 <p className="text-slate-700 leading-relaxed">{myths[currentMythIndex].fact}</p>
               </div>
+              <SpeakButton text={`Fact: ${myths[currentMythIndex].fact}`} />
             </div>
           </div>
 

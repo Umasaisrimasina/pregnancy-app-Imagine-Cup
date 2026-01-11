@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, Info, Link, RotateCw, Plus, Flame } from 'lucide-react';
+import { SpeakableText, SpeakButton } from './SpeakableText';
 
 export const CycleCalendar: React.FC = () => {
   const [selectedDay, setSelectedDay] = useState<number>(14);
@@ -59,9 +60,11 @@ export const CycleCalendar: React.FC = () => {
            <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center">
              <Flame size={24} fill="currentColor" />
            </div>
-           <div>
-             <h2 className="text-xl font-display font-bold text-slate-900">Menstrual Cycle Tracker</h2>
-             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-0.5">Conception Planning & Cycle Awareness</p>
+           <div className="flex-1">
+             <SpeakableText text="Menstrual Cycle Tracker. Conception Planning and Cycle Awareness. Track your period, fertile days, and ovulation.">
+               <h2 className="text-xl font-display font-bold text-slate-900">Menstrual Cycle Tracker</h2>
+               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-0.5">Conception Planning & Cycle Awareness</p>
+             </SpeakableText>
            </div>
         </div>
         <button className="bg-rose-500 hover:bg-rose-600 text-white px-6 py-3 rounded-xl font-bold text-sm shadow-lg shadow-rose-500/20 transition-all flex items-center gap-2">
@@ -79,8 +82,10 @@ export const CycleCalendar: React.FC = () => {
                  <svg width="100" height="100" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
               </div>
               <div className="relative z-10">
-                 <span className="text-xs font-bold text-rose-400 uppercase tracking-widest mb-1 block">Current Phase</span>
-                 <h3 className="text-2xl font-display font-bold text-rose-900 mb-4">Follicular Phase</h3>
+                 <SpeakableText text="Current Phase: Follicular Phase. Day 14 of 28. You are in your fertile window.">
+                   <span className="text-xs font-bold text-rose-400 uppercase tracking-widest mb-1 block">Current Phase</span>
+                   <h3 className="text-2xl font-display font-bold text-rose-900 mb-4">Follicular Phase</h3>
+                 </SpeakableText>
                  <div className="h-2 bg-rose-200 rounded-full overflow-hidden mb-2">
                    <div className="h-full bg-rose-500 w-1/2 rounded-full"></div>
                  </div>

@@ -1,14 +1,36 @@
 import React from 'react';
-import { ArrowLeft, ShieldCheck, Clock, Brain, Baby, Shield } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, Clock, Brain, Baby, Shield, Globe } from 'lucide-react';
 import { AppPhase } from '../types';
+import { SpeakableText, SpeakButton } from '../components/SpeakableText';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface PageProps {
   phase: AppPhase;
 }
 
 export const Education: React.FC<PageProps> = ({ phase }) => {
+  const { language, setLanguage, supportedLanguages } = useLanguage();
+  
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
+      
+      {/* Language Selector */}
+      <div className="flex justify-end">
+        <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-slate-200 shadow-sm">
+          <Globe size={16} className="text-slate-500" />
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="bg-transparent text-sm font-medium text-slate-700 focus:outline-none cursor-pointer"
+          >
+            {supportedLanguages.map((lang) => (
+              <option key={lang.code} value={lang.code}>
+                {lang.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
       
       {/* Hero */}
       <div className="bg-white rounded-[2rem] p-8 lg:p-12 shadow-sm border border-slate-100 overflow-hidden relative">
@@ -18,12 +40,14 @@ export const Education: React.FC<PageProps> = ({ phase }) => {
                <ShieldCheck size={14} />
                The Science
             </div>
-            <h1 className="text-4xl lg:text-5xl font-display font-extrabold text-slate-900 mb-6 leading-tight">
-               It starts before <br/>day one.
-            </h1>
-            <p className="text-lg text-slate-600 leading-relaxed max-w-2xl">
-              Did you know? An egg takes about 90 days to mature before it's released. The health of your body during this 3-6 month window directly impacts the genetic material you pass on.
-            </p>
+            <SpeakableText text="It starts before day one. Did you know? An egg takes about 90 days to mature before it's released. The health of your body during this 3-6 month window directly impacts the genetic material you pass on.">
+              <h1 className="text-4xl lg:text-5xl font-display font-extrabold text-slate-900 mb-6 leading-tight">
+                 It starts before <br/>day one.
+              </h1>
+              <p className="text-lg text-slate-600 leading-relaxed max-w-2xl">
+                Did you know? An egg takes about 90 days to mature before it's released. The health of your body during this 3-6 month window directly impacts the genetic material you pass on.
+              </p>
+            </SpeakableText>
          </div>
       </div>
 

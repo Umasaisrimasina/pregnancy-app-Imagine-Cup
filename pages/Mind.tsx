@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from 'recharts';
 import { Smile, Frown, Meh, Lock, Mic, ArrowRight, X, Send, Shield } from 'lucide-react';
 import { AppPhase } from '../types';
+import { SpeakableText, SpeakButton } from '../components/SpeakableText';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface PageProps {
   phase: AppPhase;
@@ -18,6 +20,7 @@ const moodData = [
 ];
 
 export const Mind: React.FC<PageProps> = ({ phase }) => {
+  const { language, setLanguage, supportedLanguages } = useLanguage();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [messages, setMessages] = useState([
@@ -54,9 +57,22 @@ export const Mind: React.FC<PageProps> = ({ phase }) => {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-display font-extrabold text-slate-900">Stress & Mind</h1>
-          <p className="text-slate-500 mt-1">Understanding your emotional baseline.</p>
+          <SpeakableText>
+            <h1 className="text-3xl font-display font-extrabold text-slate-900">Stress & Mind</h1>
+            <p className="text-slate-500 mt-1">Understanding your emotional baseline.</p>
+          </SpeakableText>
         </div>
+        <select
+          value={language}
+          onChange={(e) => setLanguage(e.target.value)}
+          className="px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+        >
+          {supportedLanguages.map((lang) => (
+            <option key={lang.code} value={lang.code}>
+              {lang.flag} {lang.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -68,7 +84,9 @@ export const Mind: React.FC<PageProps> = ({ phase }) => {
             
             <div className="relative z-10">
               <div className="flex justify-between items-center mb-8">
-                <h2 className="text-xl font-bold font-display text-slate-900">Daily Check-In</h2>
+                <SpeakableText>
+                  <h2 className="text-xl font-bold font-display text-slate-900">Daily Check-In</h2>
+                </SpeakableText>
                 <span className="text-xs font-medium text-slate-400 bg-slate-50 px-3 py-1 rounded-full">Today</span>
               </div>
 
@@ -95,7 +113,9 @@ export const Mind: React.FC<PageProps> = ({ phase }) => {
 
               {/* Factors */}
               <div className="mb-8">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 block">What's affecting you?</label>
+                <SpeakableText>
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 block">What's affecting you?</label>
+                </SpeakableText>
                 <div className="flex flex-wrap gap-2">
                   {['Sleep', 'Work', 'Family', 'My Body', 'Diet'].map((tag, i) => (
                     <button key={i} className={`px-4 py-2 rounded-full text-sm border transition-colors ${tag === 'My Body' ? 'bg-primary-50 border-primary-200 text-primary-700 font-medium' : 'border-slate-200 text-slate-600 hover:border-primary-200'}`}>
@@ -131,7 +151,9 @@ export const Mind: React.FC<PageProps> = ({ phase }) => {
           {/* Mood Trends Chart */}
           <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 h-[300px]">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold font-display text-slate-900">Mood Trends</h2>
+              <SpeakableText>
+                <h2 className="text-lg font-bold font-display text-slate-900">Mood Trends</h2>
+              </SpeakableText>
               <span className="text-xs font-bold text-primary-600 bg-primary-50 px-2 py-1 rounded-md">
                 +15% vs Last Week
               </span>
@@ -172,10 +194,15 @@ export const Mind: React.FC<PageProps> = ({ phase }) => {
                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center mb-4 backdrop-blur-sm">
                  <Lock size={20} className="text-primary-300" />
                </div>
-               <h3 className="text-lg font-bold font-display mb-2">Silent Chat</h3>
-               <p className="text-slate-400 text-sm mb-6 leading-relaxed">
-                 Feeling overwhelmed? Vent anonymously to our AI companion. No judgement, just a safe space.
-               </p>
+               <div className="flex items-start gap-2">
+                 <div>
+                   <h3 className="text-lg font-bold font-display mb-2">Silent Chat</h3>
+                   <p className="text-slate-400 text-sm mb-6 leading-relaxed">
+                     Feeling overwhelmed? Vent anonymously to our AI companion. No judgement, just a safe space.
+                   </p>
+                 </div>
+                 <SpeakButton text="Silent Chat. Feeling overwhelmed? Vent anonymously to our AI companion. No judgement, just a safe space." />
+               </div>
                
                <div className="flex items-center gap-2 text-sm font-bold text-primary-300 group-hover:text-primary-200 transition-colors">
                  Start Secure Session <ArrowRight size={16} />
@@ -200,7 +227,9 @@ export const Mind: React.FC<PageProps> = ({ phase }) => {
                      <Lock size={18} className="text-primary-400" />
                    </div>
                    <div>
-                     <h3 className="font-bold font-display">Silent Chat</h3>
+                     <SpeakableText>
+                       <h3 className="font-bold font-display">Silent Chat</h3>
+                     </SpeakableText>
                      <div className="flex items-center gap-1.5 opacity-80">
                        <span className="w-1.5 h-1.5 rounded-full bg-primary-400 animate-pulse"></span>
                        <span className="text-[10px] font-bold uppercase tracking-wider">Secure & Encrypted</span>

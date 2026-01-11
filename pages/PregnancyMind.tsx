@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from 'recharts';
-import { Smile, Frown, Meh, Lock, Mic, ArrowRight, X, Send, Shield, Heart } from 'lucide-react';
+import { Smile, Frown, Meh, Lock, Mic, ArrowRight, X, Send, Shield, Heart, Globe } from 'lucide-react';
+import { SpeakableText, SpeakButton } from '../components/SpeakableText';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const moodData = [
   { day: 'M', value: 3 },
@@ -13,6 +15,7 @@ const moodData = [
 ];
 
 export const PregnancyMind: React.FC = () => {
+  const { language, setLanguage, supportedLanguages } = useLanguage();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [messages, setMessages] = useState([
@@ -47,18 +50,40 @@ export const PregnancyMind: React.FC = () => {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
       
+      {/* Language Selector */}
+      <div className="flex justify-end">
+        <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-slate-200 shadow-sm">
+          <Globe size={16} className="text-slate-500" />
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="bg-transparent text-sm font-medium text-slate-700 focus:outline-none cursor-pointer"
+          >
+            {supportedLanguages.map((lang) => (
+              <option key={lang.code} value={lang.code}>
+                {lang.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       {/* Motivational Quote - Centered */}
       <div className="flex flex-col items-center justify-center text-center py-16 bg-slate-50/50 rounded-[2rem] my-4">
         <Heart size={40} className="text-rose-400 mb-6" />
-        <p className="font-serif italic text-3xl md:text-4xl lg:text-5xl text-slate-800 leading-relaxed max-w-4xl px-8" style={{ fontFamily: "'DM Serif Display', serif" }}>
-          You are stronger than you know. Each day brings you closer to meeting your little one.
-        </p>
+        <SpeakableText text="You are stronger than you know. Each day brings you closer to meeting your little one.">
+          <p className="font-serif italic text-3xl md:text-4xl lg:text-5xl text-slate-800 leading-relaxed max-w-4xl px-8" style={{ fontFamily: "'DM Serif Display', serif" }}>
+            You are stronger than you know. Each day brings you closer to meeting your little one.
+          </p>
+        </SpeakableText>
       </div>
 
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-display font-extrabold text-slate-900">Prenatal Wellness</h1>
-          <p className="text-slate-500 mt-1">Nurturing your emotional health during pregnancy.</p>
+          <SpeakableText text="Prenatal Wellness. Nurturing your emotional health during pregnancy.">
+            <h1 className="text-3xl font-display font-extrabold text-slate-900">Prenatal Wellness</h1>
+            <p className="text-slate-500 mt-1">Nurturing your emotional health during pregnancy.</p>
+          </SpeakableText>
         </div>
       </div>
 
@@ -175,7 +200,10 @@ export const PregnancyMind: React.FC = () => {
                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center mb-4 backdrop-blur-sm">
                  <Lock size={20} className="text-rose-300" />
                </div>
-               <h3 className="text-lg font-bold font-display mb-2">Midwife AI</h3>
+               <div className="flex items-start justify-between mb-2">
+                 <h3 className="text-lg font-bold font-display">Midwife AI</h3>
+                 <SpeakButton text="Midwife AI. Need to talk through pregnancy concerns? Our AI companion is here to support you." size={14} className="bg-white/10 hover:bg-white/20" />
+               </div>
                <p className="text-slate-400 text-sm mb-6 leading-relaxed">
                  Need to talk through pregnancy concerns? Our AI companion is here to support you.
                </p>

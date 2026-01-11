@@ -18,6 +18,7 @@ import { PostPartumEducation } from './pages/PostPartumEducation';
 import { BabyCareEducation } from './pages/BabyCareEducation';
 import { ViewState, AppPhase, UserRole, PHASE_CONFIG } from './types';
 import { AuthProvider } from './contexts/AuthContext';
+import { LanguageProvider } from './contexts/LanguageContext';
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -69,15 +70,18 @@ const App: React.FC = () => {
 
   if (!isAuthenticated) {
     return (
-      <AuthProvider>
-        <Login onLogin={handleLogin} />
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <Login onLogin={handleLogin} />
+        </AuthProvider>
+      </LanguageProvider>
     );
   }
 
   return (
-    <AuthProvider>
-      <div className={`min-h-screen bg-gray-50/50 flex text-slate-900 font-sans theme-${themeColor}`}>
+    <LanguageProvider>
+      <AuthProvider>
+        <div className={`min-h-screen bg-gray-50/50 flex text-slate-900 font-sans theme-${themeColor}`}>
       
       {/* Sidebar Component */}
       <Sidebar 
@@ -116,7 +120,8 @@ const App: React.FC = () => {
         </div>
       </main>
     </div>
-    </AuthProvider>
+      </AuthProvider>
+    </LanguageProvider>
   );
 };
 

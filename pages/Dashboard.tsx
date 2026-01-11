@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, LineChart, Line, CartesianGrid, Dot, BarChart, Bar } from 'recharts';
-import { Activity, ArrowRight, CheckCircle2, AlertCircle, Calendar, Scale, Moon, Milk, Plus, Clock, Sparkles, Send, Heart, Shield, Lock, Stethoscope, ClipboardList, Watch, Smartphone, Cloud, Link2, MoreHorizontal, Info, Check, Wind, Brain, Volume2, Droplets, Minus, MapPin, Smile, Meh, Frown, Baby, Utensils, FlaskConical, Tv, ShieldCheck, Zap, Flame, Users, HeartHandshake, CheckSquare, ChefHat, ShoppingCart, MessageCircle, Play, Lightbulb, Camera, Mic, Gift, Search, Bell, FileText, AlertTriangle, TrendingUp, User, ChevronRight, RefreshCw, SmartphoneNfc } from 'lucide-react';
+import { Activity, ArrowRight, CheckCircle2, AlertCircle, Calendar, Scale, Moon, Milk, Plus, Clock, Sparkles, Send, Heart, Shield, Lock, Stethoscope, ClipboardList, Watch, Smartphone, Cloud, Link2, MoreHorizontal, Info, Check, Wind, Brain, Volume2, Droplets, Minus, MapPin, Smile, Meh, Frown, Baby, Utensils, FlaskConical, Tv, ShieldCheck, Zap, Flame, Users, HeartHandshake, CheckSquare, ChefHat, ShoppingCart, MessageCircle, Play, Lightbulb, Camera, Mic, Gift, Search, Bell, FileText, AlertTriangle, TrendingUp, User, ChevronRight, RefreshCw, SmartphoneNfc, Globe } from 'lucide-react';
 import { AppPhase, UserRole } from '../types';
 import { CycleCalendar } from '../components/CycleCalendar';
 import { PreConceptionGuide } from '../components/PreConceptionGuide';
 import { PregnancyCalendar } from '../components/PregnancyCalendar';
+import { SpeakableText, SpeakButton } from '../components/SpeakableText';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface DashboardProps {
   phase: AppPhase;
@@ -149,6 +151,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ phase, role }) => {
     { label: 'Postnatal Vitamin', done: false },
     { label: '15 min Walk', done: true },
   ]);
+  
+  const { language, setLanguage, supportedLanguages, languageName } = useLanguage();
 
   // Simulate Real-time Data
   useEffect(() => {
@@ -587,6 +591,24 @@ export const Dashboard: React.FC<DashboardProps> = ({ phase, role }) => {
   // VIEW: MOTHER DASHBOARD (Default / Pre-Conception / Pregnancy / Post-Partum)
   // ----------------------------------------------------------------------
 
+  // Language Selector Component (reusable in all views)
+  const LanguageSelector = () => (
+    <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-slate-200 shadow-sm">
+      <Globe size={16} className="text-slate-500" />
+      <select
+        value={language}
+        onChange={(e) => setLanguage(e.target.value)}
+        className="bg-transparent text-sm font-medium text-slate-700 focus:outline-none cursor-pointer"
+      >
+        {supportedLanguages.map((lang) => (
+          <option key={lang.code} value={lang.code}>
+            {lang.name}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+
   // ----------------------------------------------------------------------
   // VIEW: Pre-Pregnancy
   // ----------------------------------------------------------------------
@@ -599,9 +621,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ phase, role }) => {
                       <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                       Planning Phase
                     </div>
-                    <h1 className="text-3xl font-display font-extrabold text-slate-900">Pre-Conception</h1>
-                    <p className="text-slate-500 mt-1">Optimization Phase</p>
+                    <SpeakableText text="Pre-Conception Optimization Phase. Track your cycle, optimize nutrition, and prepare your body for pregnancy.">
+                      <h1 className="text-3xl font-display font-extrabold text-slate-900">Pre-Conception</h1>
+                      <p className="text-slate-500 mt-1">Optimization Phase</p>
+                    </SpeakableText>
                 </div>
+                <LanguageSelector />
              </div>
              <PreConceptionGuide />
              <CycleCalendar />
@@ -621,9 +646,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ phase, role }) => {
               <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
               Trimester 2
             </div>
-            <h1 className="text-3xl font-display font-extrabold text-slate-900">Pregnancy</h1>
-            <p className="text-slate-500 mt-1">Week 24 • Day 3</p>
+            <SpeakableText text="Pregnancy Week 24, Day 3. Your baby is now the size of an ear of corn. Track your fetal growth and monitor your health.">
+              <h1 className="text-3xl font-display font-extrabold text-slate-900">Pregnancy</h1>
+              <p className="text-slate-500 mt-1">Week 24 • Day 3</p>
+            </SpeakableText>
           </div>
+          <LanguageSelector />
         </div>
 
         {/* Timeline & Chat */}
@@ -650,7 +678,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ phase, role }) => {
                      <span className="inline-block bg-rose-100 text-rose-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Size: {item.size}</span>
                    </div>
 
-                   <h3 className="text-lg font-bold font-display text-slate-900 mb-1.5">{item.title}</h3>
+                   <div className="flex items-start justify-between mb-1.5">
+                     <h3 className="text-lg font-bold font-display text-slate-900">{item.title}</h3>
+                     <SpeakButton text={`${item.month}. ${item.title}. ${item.desc}. How you might feel: ${item.feelings}. Nurturing tip: ${item.nurture}`} size={14} />
+                   </div>
                    <p className="text-xs text-slate-600 mb-4 leading-relaxed line-clamp-3">
                      {item.desc}
                    </p>
@@ -676,10 +707,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ phase, role }) => {
                      </div>
                    </div>
                    <div className="flex-1 space-y-4 mb-4 overflow-y-auto custom-scrollbar pr-1">
-                      <div className="flex gap-3">
-                         <div className="bg-white/10 p-3 rounded-2xl rounded-tl-none text-xs text-slate-200 leading-relaxed border border-white/5">
+                      <div className="flex gap-3 items-start">
+                         <div className="bg-white/10 p-3 rounded-2xl rounded-tl-none text-xs text-slate-200 leading-relaxed border border-white/5 flex-1">
                             I noticed you're in Week 24. This is often when baby's movements become more distinct. Have you felt any strong kicks today?
                          </div>
+                         <SpeakButton text="I noticed you're in Week 24. This is often when baby's movements become more distinct. Have you felt any strong kicks today?" size={14} className="bg-white/10 hover:bg-white/20" />
                       </div>
                    </div>
                    <div className="relative mt-auto">
@@ -886,9 +918,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ phase, role }) => {
                    <div className="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-200">
                       <Stethoscope size={28} />
                    </div>
-                   <div>
-                      <h2 className="text-2xl font-display font-bold text-slate-900">Doctor's Clinical Summary</h2>
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Last Update: Oct 12 by Dr. Aditi Sharma</p>
+                   <div className="flex items-center gap-3">
+                      <div>
+                        <h2 className="text-2xl font-display font-bold text-slate-900">Doctor's Clinical Summary</h2>
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Last Update: Oct 12 by Dr. Aditi Sharma</p>
+                      </div>
+                      <SpeakButton text="Doctor's Clinical Summary. Last updated October 12 by Dr. Aditi Sharma. Diagnosis: G1P0 gestation at 24 weeks. Overall clinical status is STABLE. Fetal growth matches gestational age perfectly. Prescribed instructions: Sleep strictly on the left lateral position. Schedule Glucose Challenge Test. Maintain 3.5 liters daily hydration goal." size={18} />
                    </div>
                 </div>
                 <div className="bg-indigo-50 text-indigo-700 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wide flex items-center gap-2 border border-indigo-100">
@@ -900,9 +935,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ phase, role }) => {
                  <div className="space-y-6">
                     <div className="bg-slate-50/50 rounded-2xl p-6 border border-slate-100">
                        <span className="text-xs font-bold text-indigo-500 uppercase tracking-widest mb-3 block">Diagnosis & Status</span>
-                       <p className="text-slate-800 font-bold text-lg leading-relaxed">
-                          G1P0 gestation at 24 weeks. Overall clinical status is <span className="text-emerald-500">STABLE</span>. Fetal growth matches gestational age perfectly.
-                       </p>
+                       <SpeakableText text="G1P0 gestation at 24 weeks. Overall clinical status is STABLE. Fetal growth matches gestational age perfectly.">
+                         <p className="text-slate-800 font-bold text-lg leading-relaxed">
+                            G1P0 gestation at 24 weeks. Overall clinical status is <span className="text-emerald-500">STABLE</span>. Fetal growth matches gestational age perfectly.
+                         </p>
+                       </SpeakableText>
                     </div>
                  </div>
                  <div className="space-y-6">
@@ -913,11 +950,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ phase, role }) => {
                         </div>
                         <div className="space-y-3">
                            {["Sleep strictly on the left lateral position.", "Schedule Glucose Challenge Test (GCT).", "Maintain 3.5L daily hydration goal."].map((item, i) => (
-                              <div key={i} className="flex items-start gap-4 p-3 bg-white border border-slate-100 rounded-2xl shadow-sm hover:border-indigo-100 transition-colors">
+                              <div key={i} className="flex items-start gap-4 p-3 bg-white border border-slate-100 rounded-2xl shadow-sm hover:border-indigo-100 transition-colors group">
                                  <div className="w-5 h-5 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 mt-0.5">
                                     <CheckCircle2 size={12} />
                                  </div>
-                                 <span className="text-sm font-bold text-slate-700 leading-snug">{item}</span>
+                                 <span className="text-sm font-bold text-slate-700 leading-snug flex-1">{item}</span>
+                                 <SpeakButton text={item} size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
                               </div>
                            ))}
                         </div>
@@ -927,9 +965,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ phase, role }) => {
             </div>
             <div className="mt-6 pt-6 border-t border-slate-50">
                  <span className="text-xs font-bold text-indigo-500 uppercase tracking-widest mb-2 block">Clinical Observations</span>
-                 <p className="text-slate-600 text-sm leading-relaxed">
-                    Fetal Heart Rate baseline at 145 bpm with moderate variability. Patient reports mild lumbar strain. Blood pressure is within normal ranges (110/70 mmHg).
-                 </p>
+                 <SpeakableText text="Fetal Heart Rate baseline at 145 beats per minute with moderate variability. Patient reports mild lumbar strain. Blood pressure is within normal ranges at 110 over 70 millimeters of mercury.">
+                   <p className="text-slate-600 text-sm leading-relaxed">
+                      Fetal Heart Rate baseline at 145 bpm with moderate variability. Patient reports mild lumbar strain. Blood pressure is within normal ranges (110/70 mmHg).
+                   </p>
+                 </SpeakableText>
              </div>
           </div>
 

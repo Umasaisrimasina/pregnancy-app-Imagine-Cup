@@ -1,6 +1,8 @@
 import React from 'react';
-import { ArrowRight, CheckCircle2, Lock, Shield } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Lock, Shield, Globe } from 'lucide-react';
 import { AppPhase } from '../types';
+import { SpeakableText, SpeakButton } from '../components/SpeakableText';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface PageProps {
   phase: AppPhase;
@@ -8,6 +10,7 @@ interface PageProps {
 }
 
 export const Transition: React.FC<PageProps> = ({ phase, setPhase }) => {
+  const { language, setLanguage, supportedLanguages } = useLanguage();
   
   const getNextPhase = (): AppPhase => {
      if (phase === 'pre-pregnancy') return 'pregnancy';
@@ -21,13 +24,33 @@ export const Transition: React.FC<PageProps> = ({ phase, setPhase }) => {
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in zoom-in-95 duration-500 pb-12">
       
+      {/* Language Selector */}
+      <div className="flex justify-end">
+        <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-slate-200 shadow-sm">
+          <Globe size={16} className="text-slate-500" />
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="bg-transparent text-sm font-medium text-slate-700 focus:outline-none cursor-pointer"
+          >
+            {supportedLanguages.map((lang) => (
+              <option key={lang.code} value={lang.code}>
+                {lang.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       <div className="text-center mb-10">
-        <h1 className="text-4xl lg:text-5xl font-display font-extrabold text-slate-900 mb-4">
-          Phase Transition
-        </h1>
-        <p className="text-lg text-slate-500 max-w-2xl mx-auto">
-          Congratulations on reaching this milestone. Let's review your progress before unlocking the next chapter.
-        </p>
+        <SpeakableText text={`Phase Transition. Congratulations on reaching this milestone. Let's review your progress before unlocking the next chapter.`}>
+          <h1 className="text-4xl lg:text-5xl font-display font-extrabold text-slate-900 mb-4">
+            Phase Transition
+          </h1>
+          <p className="text-lg text-slate-500 max-w-2xl mx-auto">
+            Congratulations on reaching this milestone. Let's review your progress before unlocking the next chapter.
+          </p>
+        </SpeakableText>
       </div>
 
       {/* Readiness Status */}

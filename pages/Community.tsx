@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { Users, MessageCircle, Send, Heart, Image, Camera, Lock, Shield, X, ArrowLeft, Search, Plus, Smile, MoreHorizontal } from 'lucide-react';
+import { Users, MessageCircle, Send, Heart, Image, Camera, Lock, Shield, X, ArrowLeft, Search, Plus, Smile, MoreHorizontal, Globe } from 'lucide-react';
 import { AppPhase } from '../types';
+import { SpeakableText, SpeakButton } from '../components/SpeakableText';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface CommunityProps {
   phase: AppPhase;
@@ -110,6 +112,7 @@ const sampleDMs = [
 ];
 
 export const Community: React.FC<CommunityProps> = ({ phase }) => {
+  const { language, setLanguage, supportedLanguages } = useLanguage();
   const [activeTab, setActiveTab] = useState<'moments' | 'groups' | 'dms'>('moments');
   const [selectedGroup, setSelectedGroup] = useState<typeof sampleGroups[0] | null>(null);
   const [selectedDM, setSelectedDM] = useState<typeof sampleDMs[0] | null>(null);
@@ -130,12 +133,30 @@ export const Community: React.FC<CommunityProps> = ({ phase }) => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-display font-extrabold text-slate-900">Mom Community</h1>
-          <p className="text-slate-500 mt-1">Connect, share, and support each other.</p>
+          <SpeakableText text="Mom Community. Connect, share, and support each other.">
+            <h1 className="text-3xl font-display font-extrabold text-slate-900">Mom Community</h1>
+            <p className="text-slate-500 mt-1">Connect, share, and support each other.</p>
+          </SpeakableText>
         </div>
-        <div className={`flex items-center gap-2 px-4 py-2 rounded-full ${colors.bg} ${colors.text} text-xs font-bold`}>
-          <Shield size={14} />
-          All conversations are encrypted & secure
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-slate-200 shadow-sm">
+            <Globe size={16} className="text-slate-500" />
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              className="bg-transparent text-sm font-medium text-slate-700 focus:outline-none cursor-pointer"
+            >
+              {supportedLanguages.map((lang) => (
+                <option key={lang.code} value={lang.code}>
+                  {lang.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className={`flex items-center gap-2 px-4 py-2 rounded-full ${colors.bg} ${colors.text} text-xs font-bold`}>
+            <Shield size={14} />
+            All conversations are encrypted & secure
+          </div>
         </div>
       </div>
 

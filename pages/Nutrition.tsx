@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, Plus, Check, MoreHorizontal, Utensils, Zap, Droplet, Sparkles, ArrowRight, X, Send, Shield, Minus } from 'lucide-react';
+import { Search, Plus, Check, MoreHorizontal, Utensils, Zap, Droplet, Sparkles, ArrowRight, X, Send, Shield, Minus, Globe } from 'lucide-react';
 import { AppPhase } from '../types';
+import { SpeakableText, SpeakButton } from '../components/SpeakableText';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface PageProps {
   phase: AppPhase;
@@ -8,6 +10,7 @@ interface PageProps {
 
 export const Nutrition: React.FC<PageProps> = ({ phase }) => {
   const [activeTab, setActiveTab] = useState('today');
+  const { language, setLanguage, supportedLanguages } = useLanguage();
 
   // Chat State
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -46,15 +49,31 @@ export const Nutrition: React.FC<PageProps> = ({ phase }) => {
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-display font-extrabold text-slate-900">Nutrition Log</h1>
-          <p className="text-slate-500 mt-1">
-             {phase === 'pre-pregnancy' && "Fueling your body for conception."}
-             {phase === 'pregnancy' && "Nourishing you and your growing baby."}
-             {phase === 'post-partum' && "Recovery foods and lactation support."}
-             {phase === 'baby-care' && "Tracking feeds and solids."}
-          </p>
+          <SpeakableText text={`Nutrition Log. ${phase === 'pre-pregnancy' ? "Fueling your body for conception." : phase === 'pregnancy' ? "Nourishing you and your growing baby." : phase === 'post-partum' ? "Recovery foods and lactation support." : "Tracking feeds and solids."}`}>
+            <h1 className="text-3xl font-display font-extrabold text-slate-900">Nutrition Log</h1>
+            <p className="text-slate-500 mt-1">
+               {phase === 'pre-pregnancy' && "Fueling your body for conception."}
+               {phase === 'pregnancy' && "Nourishing you and your growing baby."}
+               {phase === 'post-partum' && "Recovery foods and lactation support."}
+               {phase === 'baby-care' && "Tracking feeds and solids."}
+            </p>
+          </SpeakableText>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+           <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-slate-200 shadow-sm">
+             <Globe size={16} className="text-slate-500" />
+             <select
+               value={language}
+               onChange={(e) => setLanguage(e.target.value)}
+               className="bg-transparent text-sm font-medium text-slate-700 focus:outline-none cursor-pointer"
+             >
+               {supportedLanguages.map((lang) => (
+                 <option key={lang.code} value={lang.code}>
+                   {lang.name}
+                 </option>
+               ))}
+             </select>
+           </div>
            <button 
              onClick={() => setActiveTab('today')}
              className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${activeTab === 'today' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 border border-slate-200'}`}

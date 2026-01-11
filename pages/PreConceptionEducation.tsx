@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Clock, Brain, Baby, Shield, Heart, Lightbulb, X, Check, ChevronLeft, ChevronRight, Volume2, Share2 } from 'lucide-react';
+import { ShieldCheck, Clock, Brain, Baby, Shield, Heart, Lightbulb, X, Check, ChevronLeft, ChevronRight, Volume2, Share2, Globe } from 'lucide-react';
+import { SpeakableText, SpeakButton } from '../components/SpeakableText';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export const PreConceptionEducation: React.FC = () => {
+  const { language, setLanguage, supportedLanguages } = useLanguage();
   const [currentMythIndex, setCurrentMythIndex] = useState(0);
   
   const myths = [
@@ -25,12 +28,32 @@ export const PreConceptionEducation: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
       
+      {/* Language Selector */}
+      <div className="flex justify-end">
+        <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-slate-200 shadow-sm">
+          <Globe size={16} className="text-slate-500" />
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="bg-transparent text-sm font-medium text-slate-700 focus:outline-none cursor-pointer"
+          >
+            {supportedLanguages.map((lang) => (
+              <option key={lang.code} value={lang.code}>
+                {lang.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       {/* Motivational Quote - Centered */}
       <div className="flex flex-col items-center justify-center text-center py-16 bg-slate-50/50 rounded-[2rem] my-4">
         <Heart size={40} className="text-emerald-400 mb-6" />
-        <p className="font-serif italic text-3xl md:text-4xl lg:text-5xl text-slate-800 leading-relaxed max-w-4xl px-8" style={{ fontFamily: "'DM Serif Display', serif" }}>
-          Every journey begins with preparation. You're investing in your future family's health.
-        </p>
+        <SpeakableText text="Every journey begins with preparation. You're investing in your future family's health.">
+          <p className="font-serif italic text-3xl md:text-4xl lg:text-5xl text-slate-800 leading-relaxed max-w-4xl px-8" style={{ fontFamily: "'DM Serif Display', serif" }}>
+            Every journey begins with preparation. You're investing in your future family's health.
+          </p>
+        </SpeakableText>
       </div>
 
       {/* Hero */}
@@ -41,12 +64,14 @@ export const PreConceptionEducation: React.FC = () => {
                <ShieldCheck size={14} />
                The Science
             </div>
-            <h1 className="text-4xl lg:text-5xl font-display font-extrabold text-slate-900 mb-6 leading-tight">
-               It starts before <br/>day one.
-            </h1>
-            <p className="text-lg text-slate-600 leading-relaxed max-w-2xl">
-              Did you know? An egg takes about 90 days to mature before it's released. The health of your body during this 3-6 month window directly impacts the genetic material you pass on.
-            </p>
+            <SpeakableText text="It starts before day one. Did you know? An egg takes about 90 days to mature before it's released. The health of your body during this 3 to 6 month window directly impacts the genetic material you pass on.">
+              <h1 className="text-4xl lg:text-5xl font-display font-extrabold text-slate-900 mb-6 leading-tight">
+                 It starts before <br/>day one.
+              </h1>
+              <p className="text-lg text-slate-600 leading-relaxed max-w-2xl">
+                Did you know? An egg takes about 90 days to mature before it's released. The health of your body during this 3-6 month window directly impacts the genetic material you pass on.
+              </p>
+            </SpeakableText>
          </div>
       </div>
 
@@ -129,9 +154,10 @@ export const PreConceptionEducation: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button className="w-8 h-8 rounded-full bg-white/80 border border-amber-200 flex items-center justify-center text-amber-600 hover:bg-amber-50 transition-colors">
-              <Volume2 size={14} />
-            </button>
+            <SpeakButton 
+              text={`Myth: ${myths[currentMythIndex].myth}. Fact: ${myths[currentMythIndex].fact}`}
+              size={14}
+            />
             <button className="w-8 h-8 rounded-full bg-white/80 border border-amber-200 flex items-center justify-center text-amber-600 hover:bg-amber-50 transition-colors">
               <Share2 size={14} />
             </button>
@@ -145,10 +171,11 @@ export const PreConceptionEducation: React.FC = () => {
               <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center shrink-0">
                 <X size={16} className="text-red-500" />
               </div>
-              <div>
+              <div className="flex-1">
                 <span className="text-[10px] font-bold text-red-500 uppercase tracking-wider block mb-1">Myth</span>
                 <p className="text-slate-800 font-semibold leading-relaxed">"{myths[currentMythIndex].myth}"</p>
               </div>
+              <SpeakButton text={`Myth: ${myths[currentMythIndex].myth}`} />
             </div>
             
             {/* Fact */}
@@ -156,10 +183,11 @@ export const PreConceptionEducation: React.FC = () => {
               <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
                 <Check size={16} className="text-emerald-600" />
               </div>
-              <div>
+              <div className="flex-1">
                 <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider block mb-1">Fact</span>
                 <p className="text-slate-700 leading-relaxed">{myths[currentMythIndex].fact}</p>
               </div>
+              <SpeakButton text={`Fact: ${myths[currentMythIndex].fact}`} />
             </div>
           </div>
 

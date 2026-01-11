@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { ArrowRight, Leaf, Heart, Stethoscope, Baby, Mail, Lock, User, CheckCircle2, Users, HeartHandshake, Eye, EyeOff } from 'lucide-react';
+import { ArrowRight, Leaf, Heart, Stethoscope, Baby, Mail, Lock, User, CheckCircle2, Users, HeartHandshake, Eye, EyeOff, Globe } from 'lucide-react';
 import { AppPhase, PHASE_CONFIG, UserRole } from '../types';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface LoginProps {
   onLogin: (phase: AppPhase, role: UserRole) => void;
@@ -23,6 +24,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [showPassword, setShowPassword] = useState(false);
   
   const { signup, login, googleSignIn, resetPassword } = useAuth();
+  const { language, setLanguage, supportedLanguages, languageName } = useLanguage();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,6 +134,26 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
       <div className="lg:w-1/2 flex items-center justify-center p-6 lg:p-16 bg-white animate-in slide-in-from-right-4 duration-500">
         <div className="w-full max-w-md">
           
+          {/* Language Selector */}
+          <div className="flex justify-end mb-4">
+            <div className="relative">
+              <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-xl border border-slate-200">
+                <Globe size={16} className="text-slate-500" />
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  className="bg-transparent text-sm font-medium text-slate-700 focus:outline-none cursor-pointer pr-6"
+                >
+                  {supportedLanguages.map((lang) => (
+                    <option key={lang.code} value={lang.code}>
+                      {lang.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+
           <div className="text-center mb-8">
             <h2 className="text-3xl font-display font-bold text-slate-900 mb-2">
               {isSignUp ? 'Create an account' : 'Welcome back'}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Bell, Shield, Trash2, EyeOff, Plus, AlertCircle } from 'lucide-react';
+import { SpeakableText, SpeakButton } from './SpeakableText';
 
 export const PregnancyCalendar: React.FC = () => {
   const month = "January 2026";
@@ -89,9 +90,13 @@ export const PregnancyCalendar: React.FC = () => {
              <div className="p-3 bg-rose-50 text-rose-500 rounded-xl">
                <CalendarIcon size={24} />
              </div>
-             <h2 className="text-2xl font-display font-bold text-slate-900">Pregnancy Calendar</h2>
+             <SpeakableText>
+               <h2 className="text-2xl font-display font-bold text-slate-900">Pregnancy Calendar</h2>
+             </SpeakableText>
            </div>
-           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-14">Week 24 • Trimester 2 Milestones</p>
+           <SpeakableText>
+             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-14">Week 24 • Trimester 2 Milestones</p>
+           </SpeakableText>
         </div>
         <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors shadow-sm whitespace-nowrap">
            <img src="https://www.gstatic.com/images/branding/product/1x/calendar_2020q4_48dp.png" alt="Google Calendar" className="w-4 h-4" />
@@ -143,7 +148,9 @@ export const PregnancyCalendar: React.FC = () => {
         {/* Right: Milestones */}
         <div className="flex-1 flex flex-col">
            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Medical Milestones</h3>
+              <SpeakableText>
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Medical Milestones</h3>
+              </SpeakableText>
               <button className="text-rose-500 hover:bg-rose-50 p-1.5 rounded-lg transition-colors">
                 <Plus size={16} />
               </button>
@@ -159,6 +166,7 @@ export const PregnancyCalendar: React.FC = () => {
                     <h4 className="font-bold text-slate-900 text-sm truncate">{m.title}</h4>
                     <p className="text-xs text-slate-500 font-medium">{m.date}</p>
                   </div>
+                  <SpeakButton text={`${m.title}. ${m.date}`} />
                   <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button className="text-slate-400 hover:text-slate-600"><EyeOff size={16}/></button>
                     {m.type === 'checkup' && <button className="text-slate-400 hover:text-rose-500"><Trash2 size={16}/></button>}
@@ -171,9 +179,10 @@ export const PregnancyCalendar: React.FC = () => {
            <div className="mt-auto bg-rose-50 rounded-xl p-4 border border-rose-100">
              <div className="flex gap-3">
                <AlertCircle size={16} className="text-rose-600 shrink-0 mt-0.5" />
-               <p className="text-[11px] leading-relaxed text-rose-900">
+               <p className="text-[11px] leading-relaxed text-rose-900 flex-1">
                  <span className="font-bold text-rose-700">IMPORTANT:</span> Tetanus toxoid (TT-1) is crucial between 16-24 weeks. Flu shots can be taken anytime to protect your baby's early immunity.
                </p>
+               <SpeakButton text="Important: Tetanus toxoid (TT-1) is crucial between 16-24 weeks. Flu shots can be taken anytime to protect your baby's early immunity." />
              </div>
            </div>
         </div>
