@@ -1,23 +1,101 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ResponsiveContainer, AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
-import { Smile, Frown, Meh, Lock, Mic, ArrowRight, X, Send, Shield, Activity, Heart, AlertCircle, CheckCircle2, Sparkles, Globe } from 'lucide-react';
+import { ResponsiveContainer, AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ReferenceLine } from 'recharts';
+import { Smile, Frown, Meh, Lock, Mic, ArrowRight, X, Send, Shield, Activity, Heart, AlertCircle, CheckCircle2, Sparkles, Globe, TrendingDown, TrendingUp, Minus } from 'lucide-react';
 import { AppPhase } from '../types';
 import { SpeakableText, SpeakButton } from '../components/SpeakableText';
 import { useLanguage } from '../contexts/LanguageContext';
+import { analyzeSentiment, compareSentimentWithEmoji, sentimentToScore, checkConsecutiveNegatives, SentimentResult } from '../services/sentimentService';
 
 interface PageProps {
   phase: AppPhase;
 }
 
-const moodTrendData = [
-  { day: 'Mon', value: 4 },
-  { day: 'Tue', value: 6 },
-  { day: 'Wed', value: 5 },
-  { day: 'Thu', value: 7 },
-  { day: 'Fri', value: 6 },
-  { day: 'Sat', value: 8 },
-  { day: 'Sun', value: 7 },
+// Interface for daily check-in entries
+interface DailyCheckIn {
+  id: string;
+  date: Date;
+  selectedMood: string; // 'rough' | 'okay' | 'good'
+  journalText: string;
+  factors: string[];
+  textSentiment?: SentimentResult;
+  moodMatch?: {
+    matches: boolean;
+    message: string;
+    moodScore: number;
+    textScore: number;
+  };
+}
+
+// Sample check-in history with sentiment data
+const sampleCheckIns: DailyCheckIn[] = [
+  {
+    id: '1',
+    date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
+    selectedMood: 'okay',
+    journalText: 'Feeling tired but managing. The baby slept a bit better last night.',
+    factors: ['Sleep', 'My Body'],
+    textSentiment: { sentiment: 'mixed', confidenceScores: { positive: 0.45, neutral: 0.35, negative: 0.2 } },
+    moodMatch: { matches: true, message: 'Your words match how you feel', moodScore: 5, textScore: 5.5 }
+  },
+  {
+    id: '2',
+    date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+    selectedMood: 'rough',
+    journalText: 'Overwhelmed with everything. I feel so exhausted and alone.',
+    factors: ['Sleep', 'Family'],
+    textSentiment: { sentiment: 'negative', confidenceScores: { positive: 0.1, neutral: 0.15, negative: 0.75 } },
+    moodMatch: { matches: true, message: 'Your words match how you feel', moodScore: 2, textScore: 2.5 }
+  },
+  {
+    id: '3',
+    date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+    selectedMood: 'good',
+    journalText: 'Had a lovely visit from my mom. She helped so much with the baby!',
+    factors: ['Family'],
+    textSentiment: { sentiment: 'positive', confidenceScores: { positive: 0.85, neutral: 0.12, negative: 0.03 } },
+    moodMatch: { matches: true, message: 'Your words match how you feel', moodScore: 8, textScore: 8.2 }
+  },
+  {
+    id: '4',
+    date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+    selectedMood: 'good',
+    journalText: 'Feeling hopeful today. Baby smiled at me for the first time!',
+    factors: ['Family'],
+    textSentiment: { sentiment: 'positive', confidenceScores: { positive: 0.9, neutral: 0.08, negative: 0.02 } },
+    moodMatch: { matches: true, message: 'Your words match how you feel', moodScore: 8, textScore: 8.8 }
+  },
+  {
+    id: '5',
+    date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+    selectedMood: 'okay',
+    journalText: 'Trying to take things one day at a time. Some moments are hard.',
+    factors: ['My Body', 'Sleep'],
+    textSentiment: { sentiment: 'mixed', confidenceScores: { positive: 0.35, neutral: 0.4, negative: 0.25 } },
+    moodMatch: { matches: true, message: 'Your words match how you feel', moodScore: 5, textScore: 4.5 }
+  },
+  {
+    id: '6',
+    date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+    selectedMood: 'rough',
+    journalText: 'Not a good day. Baby was fussy all night and I feel like crying.',
+    factors: ['Sleep', 'My Body'],
+    textSentiment: { sentiment: 'negative', confidenceScores: { positive: 0.08, neutral: 0.2, negative: 0.72 } },
+    moodMatch: { matches: true, message: 'Your words match how you feel', moodScore: 2, textScore: 2.8 }
+  }
 ];
+
+// Generate mood trend data from check-ins
+const generateMoodTrendData = (checkIns: DailyCheckIn[]) => {
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  return checkIns.map((checkIn, index) => ({
+    day: days[checkIn.date.getDay()],
+    moodValue: checkIn.moodMatch?.moodScore || 5,
+    textValue: checkIn.moodMatch?.textScore || 5,
+    sentiment: checkIn.textSentiment?.sentiment || 'neutral'
+  }));
+};
+
+const moodTrendData = generateMoodTrendData(sampleCheckIns);
 
 const screeningHistoryData = [
   { month: 'Sep', score: 8 },
@@ -96,6 +174,68 @@ export const PostPartumMind: React.FC<PageProps> = ({ phase }) => {
   const [answers, setAnswers] = useState<number[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [screeningComplete, setScreeningComplete] = useState(false);
+
+  // Sentiment Analysis State
+  const [journalText, setJournalText] = useState('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [liveSentiment, setLiveSentiment] = useState<SentimentResult | null>(null);
+  const [checkIns, setCheckIns] = useState<DailyCheckIn[]>(sampleCheckIns);
+  const [lastSaveResult, setLastSaveResult] = useState<{ success: boolean; moodMatch?: DailyCheckIn['moodMatch'] } | null>(null);
+
+  // Check for consecutive negative entries
+  const hasConsecutiveNegatives = checkConsecutiveNegatives(checkIns.map(c => c.textSentiment?.sentiment || 'neutral'));
+
+  // Debounced sentiment analysis for journal input
+  useEffect(() => {
+    if (journalText.length < 10) {
+      setLiveSentiment(null);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      const result = await analyzeSentiment(journalText);
+      setLiveSentiment(result);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [journalText]);
+
+  // Handle saving check-in with sentiment analysis
+  const handleSaveCheckIn = async () => {
+    if (!journalText.trim()) return;
+
+    setIsAnalyzing(true);
+    try {
+      const sentimentResult = await analyzeSentiment(journalText);
+      const moodMatch = compareSentimentWithEmoji(selectedMood, sentimentResult);
+
+      const newCheckIn: DailyCheckIn = {
+        id: Date.now().toString(),
+        date: new Date(),
+        selectedMood,
+        journalText,
+        factors: selectedFactors,
+        textSentiment: sentimentResult,
+        moodMatch
+      };
+
+      setCheckIns(prev => [...prev, newCheckIn]);
+      setLastSaveResult({ success: true, moodMatch });
+      setJournalText('');
+      setLiveSentiment(null);
+
+      // Clear success message after 5 seconds
+      setTimeout(() => setLastSaveResult(null), 5000);
+    } catch (error) {
+      console.error('Error saving check-in:', error);
+      setLastSaveResult({ success: false });
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  // Get mood trend data from current check-ins
+  const currentMoodTrendData = generateMoodTrendData(checkIns.slice(-7));
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -252,26 +392,114 @@ export const PostPartumMind: React.FC<PageProps> = ({ phase }) => {
                 </div>
               </div>
 
-              {/* Journal Input */}
+              {/* Journal Input with Live Sentiment */}
               <div className="relative">
                 <textarea 
                   className="w-full h-32 bg-slate-50 border-0 rounded-2xl p-5 text-slate-700 resize-none focus:ring-2 focus:ring-purple-200 placeholder:text-slate-400 text-sm leading-relaxed"
                   placeholder="Write as much or as little as you need..."
+                  value={journalText}
+                  onChange={(e) => setJournalText(e.target.value)}
+                  disabled={isAnalyzing}
                 ></textarea>
                 <button className="absolute bottom-4 right-4 p-2 bg-white rounded-full shadow-sm text-slate-400 hover:text-purple-600">
                   <Mic size={20} />
                 </button>
               </div>
 
+              {/* Live Sentiment Preview */}
+              {liveSentiment && journalText.length >= 10 && (
+                <div className={`mt-4 p-4 rounded-xl border ${
+                  liveSentiment.sentiment === 'positive' ? 'bg-green-50 border-green-200' :
+                  liveSentiment.sentiment === 'negative' ? 'bg-red-50 border-red-200' :
+                  'bg-slate-50 border-slate-200'
+                }`}>
+                  <div className="flex items-center gap-2">
+                    {liveSentiment.sentiment === 'positive' ? (
+                      <TrendingUp size={16} className="text-green-600" />
+                    ) : liveSentiment.sentiment === 'negative' ? (
+                      <TrendingDown size={16} className="text-red-600" />
+                    ) : (
+                      <Minus size={16} className="text-slate-500" />
+                    )}
+                    <span className="text-xs font-medium capitalize">
+                      Detected tone: <strong>{liveSentiment.sentiment}</strong>
+                    </span>
+                    <span className="text-xs text-slate-400">
+                      ({Math.round(Math.max(liveSentiment.confidenceScores.positive, liveSentiment.confidenceScores.neutral, liveSentiment.confidenceScores.negative) * 100)}% confident)
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Success/Mismatch Feedback */}
+              {lastSaveResult && (
+                <div className={`mt-4 p-4 rounded-xl ${
+                  lastSaveResult.moodMatch?.matches 
+                    ? 'bg-green-50 border border-green-200' 
+                    : 'bg-amber-50 border border-amber-200'
+                }`}>
+                  {lastSaveResult.moodMatch?.matches ? (
+                    <div className="flex items-center gap-2 text-green-700">
+                      <CheckCircle2 size={18} />
+                      <span className="text-sm font-medium">Entry saved! Your words align with how you feel. 💚</span>
+                    </div>
+                  ) : (
+                    <div className="text-amber-700">
+                      <div className="flex items-center gap-2 mb-2">
+                        <AlertCircle size={18} />
+                        <span className="text-sm font-medium">{lastSaveResult.moodMatch?.message}</span>
+                      </div>
+                      <p className="text-xs">
+                        It's okay if there's a mismatch — sometimes our words reveal feelings we haven't fully acknowledged yet. 
+                        Would you like to talk to someone about how you're feeling?
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="mt-6 flex justify-end">
-                <button className="bg-purple-600 text-white px-8 py-3 rounded-xl font-bold text-sm shadow-lg shadow-purple-600/20 hover:bg-purple-700 transition-colors">
-                  Save Entry
+                <button 
+                  onClick={handleSaveCheckIn}
+                  disabled={isAnalyzing || !journalText.trim()}
+                  className={`px-8 py-3 rounded-xl font-bold text-sm shadow-lg transition-colors ${
+                    isAnalyzing || !journalText.trim()
+                      ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                      : 'bg-purple-600 text-white shadow-purple-600/20 hover:bg-purple-700'
+                  }`}
+                >
+                  {isAnalyzing ? 'Analyzing...' : 'Save Entry'}
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Mood Trends Chart */}
+          {/* Consecutive Negative Alert */}
+          {hasConsecutiveNegatives && (
+            <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-[2rem] p-6 shadow-sm border border-red-200">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                  <AlertCircle size={24} className="text-red-600" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-red-800 mb-1">We're here for you 💕</h3>
+                  <p className="text-sm text-red-700 mb-3">
+                    We've noticed you've been having a difficult few days. It's okay to ask for help — you don't have to go through this alone.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <button className="px-4 py-2 bg-white border border-red-200 rounded-lg text-sm font-medium text-red-700 hover:bg-red-50">
+                      Talk to a Counselor
+                    </button>
+                    <button className="px-4 py-2 bg-red-600 rounded-lg text-sm font-medium text-white hover:bg-red-700">
+                      Crisis Resources
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Mood Trends Chart - Enhanced with Dual Lines */}
           <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
@@ -285,13 +513,18 @@ export const PostPartumMind: React.FC<PageProps> = ({ phase }) => {
               </span>
             </div>
             
+            {/* Enhanced dual-line chart comparing selected mood vs text sentiment */}
             <div className="h-56 w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={moodTrendData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <AreaChart data={currentMoodTrendData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorMoodPurple" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.2}/>
                       <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                    </linearGradient>
+                    <linearGradient id="colorTextBlue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.2}/>
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
                   <XAxis 
@@ -301,17 +534,36 @@ export const PostPartumMind: React.FC<PageProps> = ({ phase }) => {
                     tick={{ fill: '#94a3b8', fontSize: 12 }} 
                   />
                   <YAxis hide domain={[0, 10]} />
+                  <ReferenceLine y={5} stroke="#e2e8f0" strokeDasharray="3 3" />
                   <Tooltip 
                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+                    formatter={(value: number, name: string) => [
+                      `${value.toFixed(1)}/10`,
+                      name === 'moodValue' ? 'Selected Mood' : 'Text Sentiment'
+                    ]}
                   />
+                  {/* Selected Mood Line (purple) */}
                   <Area 
                     type="monotone" 
-                    dataKey="value" 
+                    dataKey="moodValue"
+                    name="moodValue"
                     stroke="#8b5cf6" 
                     strokeWidth={3}
                     fill="url(#colorMoodPurple)" 
                     dot={{ r: 4, fill: "#ffffff", stroke: "#8b5cf6", strokeWidth: 2 }}
                     activeDot={{ r: 6, fill: "#8b5cf6", stroke: "#ffffff", strokeWidth: 2 }}
+                  />
+                  {/* Text Sentiment Line (blue) */}
+                  <Area 
+                    type="monotone" 
+                    dataKey="textValue"
+                    name="textValue"
+                    stroke="#3b82f6" 
+                    strokeWidth={2}
+                    strokeDasharray="5 5"
+                    fill="url(#colorTextBlue)" 
+                    dot={{ r: 3, fill: "#ffffff", stroke: "#3b82f6", strokeWidth: 2 }}
+                    activeDot={{ r: 5, fill: "#3b82f6", stroke: "#ffffff", strokeWidth: 2 }}
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -319,18 +571,18 @@ export const PostPartumMind: React.FC<PageProps> = ({ phase }) => {
             
             <div className="flex justify-center gap-6 mt-4">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-purple-500 opacity-50"></div>
-                <span className="text-xs font-medium text-slate-500">Needs Attention (0-4)</span>
+                <div className="w-8 h-1 rounded-full bg-purple-500"></div>
+                <span className="text-xs font-medium text-slate-500">Selected Mood</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-purple-500 opacity-30"></div>
-                <span className="text-xs font-medium text-slate-500">Okay (4-6)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-purple-500 opacity-10"></div>
-                <span className="text-xs font-medium text-slate-500">Good (6-10)</span>
+                <div className="w-8 h-1 rounded-full bg-blue-500" style={{ background: 'repeating-linear-gradient(90deg, #3b82f6, #3b82f6 4px, transparent 4px, transparent 8px)' }}></div>
+                <span className="text-xs font-medium text-slate-500">Text Sentiment</span>
               </div>
             </div>
+            
+            <p className="text-xs text-center text-slate-400 mt-3">
+              When the lines diverge, your words may reveal feelings you haven't fully acknowledged
+            </p>
           </div>
         </div>
 

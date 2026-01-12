@@ -98,7 +98,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
       <div className="lg:w-1/2 bg-slate-900 relative overflow-hidden flex flex-col justify-between p-8 lg:p-16 text-white min-h-[300px] lg:min-h-screen">
         <div className="absolute inset-0 z-0">
           <img 
-            src="https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=2070&auto=format&fit=crop" 
+            src="/images/mom_baby.png" 
             alt="Motherhood Journey" 
             className="w-full h-full object-cover opacity-40"
           />

@@ -1,18 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, LineChart, Line, CartesianGrid, Dot, BarChart, Bar } from 'recharts';
-import { Activity, ArrowRight, CheckCircle2, AlertCircle, Calendar, Scale, Moon, Milk, Plus, Clock, Sparkles, Send, Heart, Shield, Lock, Stethoscope, ClipboardList, Watch, Smartphone, Cloud, Link2, MoreHorizontal, Info, Check, Wind, Brain, Volume2, Droplets, Minus, MapPin, Smile, Meh, Frown, Baby, Utensils, FlaskConical, Tv, ShieldCheck, Zap, Flame, Users, HeartHandshake, CheckSquare, ChefHat, ShoppingCart, MessageCircle, Play, Lightbulb, Camera, Mic, Gift, Search, Bell, FileText, AlertTriangle, TrendingUp, User, ChevronRight, RefreshCw, SmartphoneNfc, Globe } from 'lucide-react';
+import { Activity, ArrowRight, CheckCircle2, AlertCircle, Calendar, Scale, Moon, Milk, Plus, Clock, Sparkles, Send, Heart, Shield, Lock, Stethoscope, ClipboardList, Watch, Smartphone, Cloud, Link2, MoreHorizontal, Info, Check, Wind, Brain, Volume2, Droplets, Minus, MapPin, Smile, Meh, Frown, Baby, Utensils, FlaskConical, Tv, ShieldCheck, Zap, Flame, Users, HeartHandshake, CheckSquare, ChefHat, ShoppingCart, MessageCircle, Play, Lightbulb, Camera, Mic, Gift, Search, Bell, FileText, AlertTriangle, TrendingUp, User, ChevronRight, RefreshCw, SmartphoneNfc, Globe, Phone } from 'lucide-react';
 import { AppPhase, UserRole } from '../types';
 import { CycleCalendar } from '../components/CycleCalendar';
 import { PreConceptionGuide } from '../components/PreConceptionGuide';
 import { PregnancyCalendar } from '../components/PregnancyCalendar';
 import { SpeakableText, SpeakButton } from '../components/SpeakableText';
 import { useLanguage } from '../contexts/LanguageContext';
+import { checkConsecutiveNegatives } from '../services/sentimentService';
 
 interface DashboardProps {
   phase: AppPhase;
   role: UserRole;
 }
 
+// Simulated check-in data for safety alert demonstration
+const recentMoodCheckIns = [
+  { sentiment: 'negative', date: '2026-01-10' },
+  { sentiment: 'negative', date: '2026-01-11' },
+  { sentiment: 'negative', date: '2026-01-12' },
+];
 // --- SHARED DATA ---
 
 const fetalTimeline = [
@@ -1124,6 +1131,57 @@ export const Dashboard: React.FC<DashboardProps> = ({ phase, role }) => {
             You are doing amazing, mama. Every small step forward is a victory.
           </p>
         </div>
+
+        {/* Mental Wellness Safety Alert - Shows when 3+ consecutive negative check-ins detected */}
+        {checkConsecutiveNegatives(recentMoodCheckIns) && (
+          <div className="bg-gradient-to-r from-rose-50 via-pink-50 to-purple-50 rounded-[2rem] p-6 shadow-lg border-2 border-rose-200 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-40 h-40 bg-rose-100 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none opacity-60"></div>
+            
+            <div className="relative z-10 flex flex-col md:flex-row gap-6">
+              <div className="flex-shrink-0">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center shadow-lg shadow-rose-500/30">
+                  <Heart size={28} className="text-white" />
+                </div>
+              </div>
+              
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="px-3 py-1 bg-rose-100 border border-rose-200 rounded-full text-xs font-bold text-rose-700 uppercase tracking-wider">
+                    We Care About You
+                  </span>
+                </div>
+                
+                <h3 className="text-xl font-bold text-slate-900 mb-2">
+                  We've noticed you've been having a difficult few days 💕
+                </h3>
+                
+                <p className="text-slate-600 text-sm mb-4 leading-relaxed">
+                  It's completely okay to not be okay. Postpartum can be overwhelming, and asking for help is a sign of strength, not weakness. 
+                  You don't have to go through this alone.
+                </p>
+                
+                <div className="flex flex-wrap gap-3">
+                  <button className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-xl font-bold text-sm shadow-lg shadow-rose-500/25 hover:shadow-xl hover:shadow-rose-500/30 transition-all hover:scale-[1.02]">
+                    <Phone size={16} />
+                    Talk to Someone Now
+                  </button>
+                  <button className="flex items-center gap-2 px-5 py-3 bg-white border-2 border-rose-200 text-rose-700 rounded-xl font-bold text-sm hover:bg-rose-50 transition-colors">
+                    <MessageCircle size={16} />
+                    Chat with a Counselor
+                  </button>
+                  <button className="flex items-center gap-2 px-5 py-3 bg-purple-50 border border-purple-200 text-purple-700 rounded-xl font-medium text-sm hover:bg-purple-100 transition-colors">
+                    <Users size={16} />
+                    Join Support Group
+                  </button>
+                </div>
+                
+                <p className="mt-4 text-xs text-slate-500">
+                  🔒 Your privacy matters. This alert is only visible to you and is not shared with anyone.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 2-Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
